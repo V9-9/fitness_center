@@ -1,0 +1,25 @@
+<component name="libraryTable">
+  <library name="out">
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/out" />
+      <root url="jar://$PROJECT_DIR$/src/opencsv-5.8.jar!/" />
+      <root url="jar://$PROJECT_DIR$/commons-lang3-3.13.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/commons-lang3-3.13.0-tests.jar!/" />
+      <root url="file://$PROJECT_DIR$/src" />
+      <root url="file://$PROJECT_DIR$" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$PROJECT_DIR$/commons-lang3-3.13.0-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="file://$PROJECT_DIR$/src" />
+      <root url="jar://$PROJECT_DIR$/commons-lang3-3.13.0-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/commons-lang3-3.13.0-test-sources.jar!/" />
+      <root url="file://$PROJECT_DIR$/src" />
+      <root url="file://$PROJECT_DIR$" />
+    </SOURCES>
+    <jarDirectory url="file://$PROJECT_DIR$" recursive="false" />
+    <jarDirectory url="file://$PROJECT_DIR$/src" recursive="false" />
+    <jarDirectory url="file://$PROJECT_DIR$" recursive="false" type="SOURCES" />
+  </library>
+</component>
