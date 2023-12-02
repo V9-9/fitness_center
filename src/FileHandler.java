@@ -1,81 +1,67 @@
-import com.opencsv.CSVReader;
-import com.opencsv.CSVWriter;
-import com.opencsv.exceptions.CsvValidationException;
-
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.LinkedList;
 
 public class FileHandler {
-    private static final String FILE_PATH = "members.csv";
-    private static final String TEMP_FILE_PATH = "members.temp";
 
-    public LinkedList<Member> readFile() throws CsvValidationException {
+    public LinkedList<Member> readFile() {
         LinkedList<Member> members = new LinkedList<>();
+        Member member;
+        String line;
+        String[] splitLine;
 
-        try (CSVReader reader = new CSVReader(new FileReader(FILE_PATH))) {
-            String[] record;
-            while ((record = reader.readNext()) != null) {
-                char memberType = record[0].charAt(0);
-                int memberID = Integer.parseInt(record[1]);
-                String name = record[2];
-                double fees = Double.parseDouble(record[3]);
-
-                if (memberType == 'S') {
-                    String clubAsString = record[4];
-                    int club = Integer.parseInt(clubAsString);
-                    SingleClubMember singleClubMember = new SingleClubMember(memberType, memberID, name, fees, club);
-                    members.add(singleClubMember);
-                } else if (memberType == 'M') {
-                    MultiClubMember multiClubMember = new MultiClubMember(memberType, memberID, name, fees, 0);
-                    int membershipPoints = Integer.parseInt(record[4]);
-                    multiClubMember.setMembershipPoints(membershipPoints);
-                    members.add(multiClubMember);
+        try(BufferedReader reader = new BufferedReader(new FileReader("members.csv"))) {
+            line = reader.readLine();
+            while (line != null){
+                splitLine = line.split(", ");
+                if (splitLine[0].equals('S')){
+                    member = new SingleClubMember('S',
+                            Integer.parseInt(splitLine[1]),
+                            splitLine[2],
+                            Double.parseDouble(splitLine[3]),
+                            Integer.parseInt(splitLine[4])
+                    );
+                }else{
+                    member = new MultiClubMember('M',
+                            Integer.parseInt(splitLine[1]),
+                            splitLine[2],
+                            Double.parseDouble(splitLine[3]),
+                            Integer.parseInt(splitLine[4])
+                    );
                 }
+                members.add(member);
+                line = reader.readLine();
             }
-        } catch (IOException | NumberFormatException e) {
-            e.printStackTrace();
+        }catch (IOException exception){
+            exception.printStackTrace();
         }
-
         return members;
     }
 
-    public void appendFile(String mem) {
-        try (FileWriter fileWriter = new FileWriter(FILE_PATH, true);
-             CSVWriter writer = new CSVWriter(fileWriter)) {
-            String[] record = mem.split(",");
-            writer.writeNext(record);
-        } catch (IOException e) {
-            e.printStackTrace();
+    public void appendFile(String mem){
+        try(BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("members.csv", true))) {
+            bufferedWriter.write(mem + "\n");
+        }catch (IOException exception){
+            exception.printStackTrace();
         }
     }
 
-    public void overwriteFile(LinkedList<Member> m) {
-        try (CSVWriter writer = new CSVWriter(new FileWriter(TEMP_FILE_PATH))) {
-            for (Member member : m) {
-                String[] record;
-                if (member.getMemberType() == 'S') {
-                    SingleClubMember singleClubMember = (SingleClubMember) member;
-                    record = new String[]{String.valueOf(member.getMemberType()), String.valueOf(member.getMemberID()), member.getName(), String.valueOf(member.getFees()), String.valueOf(singleClubMember.getClub())};
-                } else {
-                    MultiClubMember multiClubMember = (MultiClubMember) member;
-                    record = new String[]{String.valueOf(member.getMemberType()), String.valueOf(member.getMemberID()), member.getName(), String.valueOf(member.getFees()), String.valueOf(multiClubMember.getMembershipPoints())};
-                }
-                writer.writeNext(record);
+    public void overwriteFile(LinkedList<Member> m){
+        String s;
+        try(BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("member.temp", false))){
+            for (int i = 0; i < m.size(); i++){
+                s = m.get(i).toString();
+                bufferedWriter.write(s + "\n");
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+        }catch (IOException exception){
+            exception.printStackTrace();
         }
-
-        File originalFile = new File(FILE_PATH);
-        File tempFile = new File(TEMP_FILE_PATH);
-
-        if (tempFile.renameTo(originalFile)) {
-            System.out.println("The file has been successfully overwritten.");
-        } else {
-            System.out.println("Failed to overwrite the file.");
+        try{
+            File f = new File("members.csv");
+            File tf = new File("member.temp");
+            f.delete();
+            tf.renameTo(f);
+        }catch (Exception exception){
+            exception.printStackTrace();
         }
     }
 }

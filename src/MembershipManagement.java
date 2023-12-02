@@ -1,3 +1,4 @@
+import java.util.InputMismatchException;
 import java.util.LinkedList;
 import java.util.Scanner;
 
@@ -5,97 +6,138 @@ public class MembershipManagement {
     final private Scanner reader = new Scanner(System.in);
 
     private int getIntInput() {
-        while (!reader.hasNextInt()) {
-            System.out.println("Invalid input. Please enter an integer.");
-            reader.next();
+        int choise = 0;
+        while (choise == 0) {
+            try{
+                choise = reader.nextInt();
+                if (choise == 0) throw new InputMismatchException();
+                reader.nextLine();
+            }catch (InputMismatchException exception){
+                System.out.println("ERROR: Invalid input. Try again");
+                reader.nextLine();
+            }
         }
-        return reader.nextInt();
+        return choise;
     }
 
     private void printClubOptions() {
-        System.out.println("1) Club Mercury");
+        System.out.println("\n1) Club Mercury");
         System.out.println("2) Club Neptune");
         System.out.println("3) Club Jupiter");
         System.out.println("4) Multi Clubs");
     }
 
     public int getChoice() {
-        System.out.println("WELCOME TO OZONE FITNESS CENTER");
+        int choise;
+        System.out.println("\nWELCOME TO OZONE FITNESS CENTER");
         System.out.println("================================");
         System.out.println("1) Add Member");
         System.out.println("2) Remove Member");
         System.out.println("3) Display Member Information");
-        System.out.println("Please select an option (or Enter -1 to quit):");
-
-        return getIntInput();
+        System.out.print("\nPlease select an option (or Enter -1 to quit):");
+        choise = getIntInput();
+        return choise;
     }
 
-    public String addMembers(LinkedList<Member> m) {
-        System.out.println("Enter member name:");
-        String name = reader.next();
-
-        System.out.println("Select club:");
-        printClubOptions();
-        int club = getIntInput();
-
-        int memberID = m.isEmpty() ? 1 : m.getLast().getMemberID() + 1;
-
-        System.out.println("Enter fees:");
-        double fees = (club >= 1 && club <= 3) ? calculateFees(club) : -1;
-
+    public String addMembers(LinkedList<Member> listMembers) {
+        String name;
+        int club;
+        String mem;
+        double fees;
+        int memberID;
         Member mbr;
-        if (fees != -1) {
-            if (club >= 1 && club <= 3) {
-                SingleClubMember singleClubMember = new SingleClubMember('S', memberID, name, fees, club);
-                m.add(singleClubMember);
-                mbr = singleClubMember;
-            } else if (club == 4) {
-                Calculator<Integer> cal = (clubID) -> (clubID == 4) ? 1200 : -1;
-                int membershipPoints = (int) calculateFees(4);
-                MultiClubMember multiClubMember = new MultiClubMember('M', memberID, name, fees, membershipPoints);
-                m.add(multiClubMember);
-                mbr = multiClubMember;
-            } else {
-                return "Invalid club selection. Member not added.";
-            }
+        Calculator<Integer> cal;
 
-            String mem = mbr.toString();
-            return "Member added successfully:\n" + mem;
+        System.out.print("\nPlease enter tne member's name: ");
+        name = reader.nextLine();
+
+        printClubOptions();
+
+        System.out.print("\nPlease enter tne member's clubID: ");
+
+        club = getIntInput();
+
+        while (club < 1 || club > 4) {
+            System.out.print("\nInvalid ClubID/ Please try again: ");
+            club = getIntInput();
+        }
+
+        if (listMembers.size() > 0) {
+            memberID = listMembers.getLast().getMemberID() + 1;
         } else {
-            return "Invalid club selection. Member not added.";
+            memberID = 1;
         }
+
+        if (club != 4) {
+            cal = (n) -> {
+                switch (n) {
+                    case 1:
+                        return 900;
+                    case 2:
+                        return 950;
+                    case 3:
+                        return 1000;
+                    default:
+                        return -1;
+                }
+            };
+
+            fees = cal.calculateFees(club);
+            mbr = new SingleClubMember('S', memberID, name, fees, club);
+            listMembers.add(mbr);
+            mem = mbr.toString();
+            System.out.println("\nSTATUS: Single Club Member added");
+        } else {
+            cal = (n) -> {
+                if (n == 4) {
+                    return 1200;
+                } else {
+                    return -1;
+                }
+            };
+            fees = cal.calculateFees(club);
+            mbr = new MultiClubMember('M', memberID, name, fees, 100);
+            listMembers.add(mbr);
+            mem = mbr.toString();
+            System.out.println("\nSTATUS: Multi Club Member added");
+        }
+        return mem;
     }
 
-    private double calculateFees(int club) {
-        return (club == 1) ? 900 : ((club == 2) ? 950 : ((club == 3) ? 1000 : -1));
-    }
-
-    public void removeMember(LinkedList<Member> m) {
-        System.out.println("Enter member ID to remove:");
-        int memberID = getIntInput();
-
-        for (Member member : m) {
-            if (member.getMemberID() == memberID) {
-                m.remove(member);
-                System.out.println("Member removed successfully.");
+    public void removeMember(LinkedList<Member> listMembers) {
+        int memberID;
+        System.out.println("\nEnter member ID to remove: ");
+        memberID = getIntInput();
+        for (int i = 0; i < listMembers.size(); i++) {
+            if (listMembers.get(i).getMemberID() == memberID) {
+                listMembers.remove(i);
+                System.out.print("\nMember removed");
                 return;
             }
         }
 
-        System.out.println("Member with ID " + memberID + " not found.");
+        System.out.println("\nMember ID not found.");
     }
 
-    public void printMemberInfo(LinkedList<Member> m) {
-        System.out.println("Enter member ID to display information:");
-        int memberID = getIntInput();
-
-        for (Member member : m) {
-            if (member.getMemberID() == memberID) {
-                System.out.println(member);
+    public void printMemberInfo(LinkedList<Member> listMembers) {
+        int memberID;
+        System.out.println("\nEnter member ID to display information: ");
+        memberID = getIntInput();
+        for (int i = 0; i < listMembers.size(); i++) {
+            if (listMembers.get(i).getMemberID() == memberID) {
+                String[] memberInfo = listMembers.get(i).toString().split(", ");
+                System.out.println("\nMember type: " + memberInfo[0]);
+                System.out.println("Member ID: " + memberInfo[1]);
+                System.out.println("Member name: " + memberInfo[2]);
+                System.out.println("Member fees: " + memberInfo[3]);
+                if (memberInfo[0].equals("S")){
+                    System.out.println("ClubID: " + memberInfo[4]);
+                }else{
+                    System.out.println("Member Ship points: " + memberInfo[4]);
+                }
                 return;
             }
         }
-
-        System.out.println("Member with ID " + memberID + " not found.");
+        System.out.println("\nMember ID not found");
     }
 }
